@@ -196,12 +196,16 @@ static void check_instruction_sets(void)
 kern_return_t AVX2Patch_start(kmod_info_t *ki, void *d)
 {
     check_instruction_sets();
-    //hook_ud_handler();
+    hook_ud_handler();
     return KERN_SUCCESS;
 }
 
 kern_return_t AVX2Patch_stop(kmod_info_t *ki, void *d)
 {
     os_log(OS_LOG_DEFAULT,"[AVX2Patch] Stopping AVX2Patch module.\n");
+    // Restore the original #UD handler
+    if (ud_hooked) {
+        restore_ud_handler();
+    }
     return KERN_SUCCESS;
 }
