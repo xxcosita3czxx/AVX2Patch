@@ -54,7 +54,14 @@ void log_instruction(uint8_t* rip) {
 
 // === Custom handler in inline assembly ===
 __attribute__((naked)) void my_ud_handler(void) {
+    static volatile int in_handler = 0;
     __asm__ volatile(
+        // Check guard to prevent reentry
+        "movl in_handler(%rip), %eax\n\t"
+        "testl %eax, %eax\n\t"
+        "jnz 1f\n\t"
+        "movl $1, in_handler(%rip)\n\t"
+
         // Save all general-purpose registers
         "pushq %rax\n\t"
         "pushq %rcx\n\t"
@@ -97,16 +104,11 @@ __attribute__((naked)) void my_ud_handler(void) {
         "popq %rcx\n\t"
         "popq %rax\n\t"
 
-        // Jump to the original handler for compatibility
-        "movq original_ud_entry+0x0(%rip), %rax\n\t"      // offset_low
-        "movq original_ud_entry+0x4(%rip), %rcx\n\t"      // offset_mid
-        "movq original_ud_entry+0x8(%rip), %rdx\n\t"      // offset_high
-        "movw %ax, %ax\n\t"
-        "shlq $16, %rcx\n\t"
-        "shlq $32, %rdx\n\t"
-        "orq %rcx, %rax\n\t"
-        "orq %rdx, %rax\n\t"
-        "jmp *%rax\n\t"
+        // Clear guard
+        "movl $0, in_handler(%rip)\n\t"
+
+        "iretq\n\t"
+        "1: hlt\n\t" // If reentered, halt to avoid recursion
     );
 }
 
