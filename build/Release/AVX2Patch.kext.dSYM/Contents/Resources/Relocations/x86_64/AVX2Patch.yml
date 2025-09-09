@@ -1,0 +1,28 @@
+---
+triple:          'x86_64-apple-darwin'
+binary-path:     '/Users/cosita3cz/Projects/AVX2Patch/build/Release/AVX2Patch.kext/Contents/MacOS/AVX2Patch'
+relocations:
+  - { offset: 0x33, size: 0x8, addend: 0x0, symName: _kmod_info, symObjAddr: 0x0, symBinAddr: 0x1008, symSize: 0x0 }
+  - { offset: 0x1E1, size: 0x8, addend: 0x0, symName: __realmain, symObjAddr: 0xC8, symBinAddr: 0x10D0, symSize: 0x0 }
+  - { offset: 0x1F6, size: 0x8, addend: 0x0, symName: __antimain, symObjAddr: 0xD0, symBinAddr: 0x10D8, symSize: 0x0 }
+  - { offset: 0x20B, size: 0x8, addend: 0x0, symName: __kext_apple_cc, symObjAddr: 0xD8, symBinAddr: 0x10E0, symSize: 0x0 }
+  - { offset: 0x23A, size: 0x8, addend: 0x0, symName: _restore_ud_handler, symObjAddr: 0x0, symBinAddr: 0x969, symSize: 0x58 }
+  - { offset: 0x255, size: 0x8, addend: 0x0, symName: _AVX2Patch_stop, symObjAddr: 0x397, symBinAddr: 0xD00, symSize: 0x26 }
+  - { offset: 0x27A, size: 0x8, addend: 0x0, symName: _AVX2Patch_stop._os_log_fmt, symObjAddr: 0x480, symBinAddr: 0xE40, symSize: 0x0 }
+  - { offset: 0x2D2, size: 0x8, addend: 0x0, symName: _original_ud_entry, symObjAddr: 0x271C, symBinAddr: 0x10E8, symSize: 0x0 }
+  - { offset: 0x3A2, size: 0x8, addend: 0x0, symName: _ud_hooked, symObjAddr: 0x2718, symBinAddr: 0x10E4, symSize: 0x0 }
+  - { offset: 0x3C5, size: 0x8, addend: 0x0, symName: _has_sse, symObjAddr: 0x272C, symBinAddr: 0x10F8, symSize: 0x0 }
+  - { offset: 0x3E1, size: 0x8, addend: 0x0, symName: _has_sse2, symObjAddr: 0x272D, symBinAddr: 0x10F9, symSize: 0x0 }
+  - { offset: 0x3F6, size: 0x8, addend: 0x0, symName: _has_sse3, symObjAddr: 0x272E, symBinAddr: 0x10FA, symSize: 0x0 }
+  - { offset: 0x40B, size: 0x8, addend: 0x0, symName: _has_ssse3, symObjAddr: 0x272F, symBinAddr: 0x10FB, symSize: 0x0 }
+  - { offset: 0x420, size: 0x8, addend: 0x0, symName: _has_sse41, symObjAddr: 0x2730, symBinAddr: 0x10FC, symSize: 0x0 }
+  - { offset: 0x435, size: 0x8, addend: 0x0, symName: _has_sse42, symObjAddr: 0x2731, symBinAddr: 0x10FD, symSize: 0x0 }
+  - { offset: 0x44A, size: 0x8, addend: 0x0, symName: _has_avx, symObjAddr: 0x2732, symBinAddr: 0x10FE, symSize: 0x0 }
+  - { offset: 0x45F, size: 0x8, addend: 0x0, symName: _has_fma, symObjAddr: 0x2733, symBinAddr: 0x10FF, symSize: 0x0 }
+  - { offset: 0x474, size: 0x8, addend: 0x0, symName: _has_avx2, symObjAddr: 0x2734, symBinAddr: 0x1100, symSize: 0x0 }
+  - { offset: 0x4DB, size: 0x8, addend: 0x0, symName: _restore_ud_handler, symObjAddr: 0x0, symBinAddr: 0x969, symSize: 0x58 }
+  - { offset: 0x532, size: 0x8, addend: 0x0, symName: _log_instruction, symObjAddr: 0x58, symBinAddr: 0x9C1, symSize: 0x43 }
+  - { offset: 0x578, size: 0x8, addend: 0x0, symName: _my_ud_handler, symObjAddr: 0x9B, symBinAddr: 0xA04, symSize: 0x47 }
+  - { offset: 0x58D, size: 0x8, addend: 0x0, symName: _hook_ud_handler, symObjAddr: 0xE2, symBinAddr: 0xA4B, symSize: 0x79 }
+  - { offset: 0x620, size: 0x8, addend: 0x0, symName: _AVX2Patch_start, symObjAddr: 0x15B, symBinAddr: 0xAC4, symSize: 0x23C }
+...
