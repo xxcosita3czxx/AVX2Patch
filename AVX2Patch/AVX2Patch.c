@@ -52,6 +52,10 @@ void log_instruction(uint8_t* rip) {
            rip[0], rip[1], rip[2], rip[3], rip[4]);
 }
 
+void _printlog(const char* msg) {
+    os_log(OS_LOG_DEFAULT,"%s", msg);
+}
+
 // === Custom handler in inline assembly ===
 __attribute__((naked)) void my_ud_handler(void) {
     static volatile int in_handler = 0;
@@ -61,6 +65,9 @@ __attribute__((naked)) void my_ud_handler(void) {
         "testl %eax, %eax\n\t"
         "jnz 1f\n\t"
         "movl $1, in_handler(%rip)\n\t"
+        
+        "movq $rdi, ghjk\n\t" \
+        "callq _printlog\n\t"
 
         // Save all general-purpose registers
         "pushq %rax\n\t"
@@ -79,11 +86,10 @@ __attribute__((naked)) void my_ud_handler(void) {
         "pushq %r14\n\t"
         "pushq %r15\n\t"
 
-        // Get RIP from interrupt frame: 15*8 bytes saved = 120
+        // Get RIP from interrupt frame: 15*8 bytes saved = 120 
         "movq 120(%rsp), %rdi\n\t"       // rdi = RIP
         "callq _log_instruction\n\t"
-        "callq _restore_ud_handler\n\t"
-
+        
         // Skip 3 bytes (naive)
         "addq $3, 120(%rsp)\n\t"
 
@@ -103,7 +109,8 @@ __attribute__((naked)) void my_ud_handler(void) {
         "popq %rdx\n\t"
         "popq %rcx\n\t"
         "popq %rax\n\t"
-
+        
+        "callq _restore_ud_handler\n\t"
         // Clear guard
         "movl $0, in_handler(%rip)\n\t"
 
@@ -135,7 +142,7 @@ void hook_ud_handler(void) {
     idt[UD_VECTOR] = new_entry;
     ud_hooked = 1;
 
-    printf("[AVX2Patch] Hooked #UD handler\n");
+    os_log(OS_LOG_DEFAULT,"[AVX2Patch] Hooked #UD handler\n");
 }
 
 static bool has_sse = false;
