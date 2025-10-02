@@ -13,6 +13,23 @@
 
 #define UD_VECTOR 6
 
+#define RAX int
+#define RDI int
+#define RSI int
+#define RCX int
+#define RDX int
+#define RBX int
+#define RBP int
+#define R8 int
+#define R9 int
+#define R10 int
+#define R11 int
+#define R12 int
+#define R13 int
+#define R14 int
+#define R15 int
+
+
 // IDT Entry
 typedef struct {
     uint16_t offset_low;
@@ -31,6 +48,7 @@ typedef struct {
 
 static idt_entry_t original_ud_entry;
 static int ud_hooked = 0;
+static uint64_t original_ud_handler_addr = 0;
 
 // === Called from ASM handler ===
 void restore_ud_handler(void) {
@@ -59,6 +77,10 @@ void _printlog(const char* msg) {
 // === Custom handler in inline assembly ===
 __attribute__((naked)) void my_ud_handler(void) {
     static volatile int in_handler = 0;
+    static volatile uint64_t saved_rax, saved_rcx, saved_rdx, saved_rsi, saved_rdi;
+    static volatile uint64_t saved_rbx, saved_rbp, saved_r8, saved_r9, saved_r10;
+    static volatile uint64_t saved_r11, saved_r12, saved_r13, saved_r14, saved_r15;
+    
     __asm__ volatile(
         // Check guard to prevent reentry
         "movl in_handler(%rip), %eax\n\t"
@@ -66,52 +88,53 @@ __attribute__((naked)) void my_ud_handler(void) {
         "jnz 1f\n\t"
         "movl $1, in_handler(%rip)\n\t"
         
-        "movq $rdi, ghjk\n\t" \
-        "callq _printlog\n\t"
 
-        // Save all general-purpose registers
-        "pushq %rax\n\t"
-        "pushq %rcx\n\t"
-        "pushq %rdx\n\t"
-        "pushq %rsi\n\t"
-        "pushq %rdi\n\t"
-        "pushq %rbx\n\t"
-        "pushq %rbp\n\t"
-        "pushq %r8\n\t"
-        "pushq %r9\n\t"
-        "pushq %r10\n\t"
-        "pushq %r11\n\t"
-        "pushq %r12\n\t"
-        "pushq %r13\n\t"
-        "pushq %r14\n\t"
-        "pushq %r15\n\t"
+        // Save all general-purpose registers to variables
+        "movq %%rax, saved_rax(%rip)\n\t"
+        "movq %%rcx, saved_rcx(%rip)\n\t"
+        "movq %%rdx, saved_rdx(%rip)\n\t"
+        "movq %%rsi, saved_rsi(%rip)\n\t"
+        "movq %%rdi, saved_rdi(%rip)\n\t"
+        "movq %%rbx, saved_rbx(%rip)\n\t"
+        "movq %%rbp, saved_rbp(%rip)\n\t"
+        "movq %%r8, saved_r8(%rip)\n\t"
+        "movq %%r9, saved_r9(%rip)\n\t"
+        "movq %%r10, saved_r10(%rip)\n\t"
+        "movq %%r11, saved_r11(%rip)\n\t"
+        "movq %%r12, saved_r12(%rip)\n\t"
+        "movq %%r13, saved_r13(%rip)\n\t"
+        "movq %%r14, saved_r14(%rip)\n\t"
+        "movq %%r15, saved_r15(%rip)\n\t"
 
-        // Get RIP from interrupt frame: 15*8 bytes saved = 120 
-        "movq 120(%rsp), %rdi\n\t"       // rdi = RIP
+        // Get RIP from interrupt frame (no registers pushed, so it's at offset 0)
+        "movq 0(%rsp), %rdi\n\t"         // rdi = RIP
         "callq _log_instruction\n\t"
         
         // Skip 3 bytes (naive)
-        "addq $3, 120(%rsp)\n\t"
+        "addq $3, 0(%rsp)\n\t"
 
-        // Restore registers
-        "popq %r15\n\t"
-        "popq %r14\n\t"
-        "popq %r13\n\t"
-        "popq %r12\n\t"
-        "popq %r11\n\t"
-        "popq %r10\n\t"
-        "popq %r9\n\t"
-        "popq %r8\n\t"
-        "popq %rbp\n\t"
-        "popq %rbx\n\t"
-        "popq %rdi\n\t"
-        "popq %rsi\n\t"
-        "popq %rdx\n\t"
-        "popq %rcx\n\t"
-        "popq %rax\n\t"
-        
-        "callq _restore_ud_handler\n\t"
-        // Clear guard
+        // Restore registers from variables
+        "movq saved_r15(%rip), %%r15\n\t"
+        "movq saved_r14(%rip), %%r14\n\t"
+        "movq saved_r13(%rip), %%r13\n\t"
+        "movq saved_r12(%rip), %%r12\n\t"
+        "movq saved_r11(%rip), %%r11\n\t"
+        "movq saved_r10(%rip), %%r10\n\t"
+        "movq saved_r9(%rip), %%r9\n\t"
+        "movq saved_r8(%rip), %%r8\n\t"
+        "movq saved_rbp(%rip), %%rbp\n\t"
+        "movq saved_rbx(%rip), %%rbx\n\t"
+        "movq saved_rdi(%rip), %%rdi\n\t"
+        "movq saved_rsi(%rip), %%rsi\n\t"
+        "movq saved_rdx(%rip), %%rdx\n\t"
+        "movq saved_rcx(%rip), %%rcx\n\t"
+        "movq saved_rax(%rip), %%rax\n\t"
+
+        // Instead of restoring, jump to original handler
+        "movq original_ud_handler_addr(%rip), %rax\n\t"
+        "jmp *%rax\n\t"
+
+        // Clear guard (never reached, but for completeness)
         "movl $0, in_handler(%rip)\n\t"
 
         "iretq\n\t"
@@ -126,6 +149,12 @@ void hook_ud_handler(void) {
     idt_entry_t* idt = (idt_entry_t*)idtr.base;
 
     original_ud_entry = idt[UD_VECTOR];
+
+    // Save the original handler address
+    original_ud_handler_addr =
+        ((uint64_t)original_ud_entry.offset_high << 32) |
+        ((uint64_t)original_ud_entry.offset_mid << 16) |
+        (uint64_t)original_ud_entry.offset_low;
 
     uint64_t handler_addr = (uint64_t)&my_ud_handler;
 
