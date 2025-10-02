@@ -75,12 +75,12 @@ void _printlog(const char* msg) {
 }
 
 // === Custom handler in inline assembly ===
+static volatile int in_handler = 0;
+static volatile uint64_t saved_rax, saved_rcx, saved_rdx, saved_rsi, saved_rdi;
+static volatile uint64_t saved_rbx, saved_rbp, saved_r8, saved_r9, saved_r10;
+static volatile uint64_t saved_r11, saved_r12, saved_r13, saved_r14, saved_r15;
+
 __attribute__((naked)) void my_ud_handler(void) {
-    static volatile int in_handler = 0;
-    static volatile uint64_t saved_rax, saved_rcx, saved_rdx, saved_rsi, saved_rdi;
-    static volatile uint64_t saved_rbx, saved_rbp, saved_r8, saved_r9, saved_r10;
-    static volatile uint64_t saved_r11, saved_r12, saved_r13, saved_r14, saved_r15;
-    
     __asm__ volatile(
         // Check guard to prevent reentry
         "movl in_handler(%rip), %eax\n\t"
