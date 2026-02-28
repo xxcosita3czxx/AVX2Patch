@@ -60,9 +60,6 @@ void _printlog(const char* msg) {
     os_log(OS_LOG_DEFAULT,"%s", msg);
 }
 
-// === Custom handler in inline assembly ===
-static volatile uint64_t saved_rip = 0;
-
 __attribute__((naked)) void my_ud_handler(void) {
     __asm__ volatile(
         // Save RIP to a C variable
