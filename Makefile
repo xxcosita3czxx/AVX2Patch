@@ -9,6 +9,12 @@ all:
 	sudo mv -f build/Release/AVX2Patch.kext dist/AVX2Patch.kext
 	sudo chown -R 0:0 dist/AVX2Patch.kext
 
+build:
+	make
+rebuild:
+	git pull
+	make
+
 clean:
 	sudo rm -rf dist
 	sudo rm -rf build
