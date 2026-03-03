@@ -2,6 +2,7 @@
 
 XCODE_ARGS = ARCHS=x86_64 ONLY_ACTIVE_ARCH=YES EXCLUDED_ARCHS=arm64
 name = AVX2Patch-DEBUG.kext
+DEBUG = 1
 
 all:
 	sudo rm -rf dist
