@@ -1,72 +1,70 @@
-#include <mach-o/loader.h>
-#include <mach-o/nlist.h>
 #include <libkern/libkern.h>
-#include <string.h>
-#include <stdint.h>
+#include <mach/mach_types.h>
 
-extern void _IOLog(const char *fmt, ...);
+extern void _vm_kernel_unslide_or_perm_external(void *ptr, long *out_base);
 
-// Finds a segment by name in the mach header
-static struct segment_command_64* FindSegment(struct mach_header_64 *hdr, const char *name) {
-    struct load_command *cmd = (struct load_command *)(hdr + 1);
+int* FindSegment64(long machHeader, const char *segment_name) {
+    int *lcPtr;
+    ulong loadCmdSize;
 
-    for (uint32_t i = 0; i < hdr->ncmds; i++) {
-        if (cmd->cmd == LC_SEGMENT_64) {
-            struct segment_command_64 *seg = (struct segment_command_64 *)cmd;
-            if (strncmp(seg->segname, name, 16) == 0)
-                return seg;
+    lcPtr = (int *)(machHeader + 0x20);         
+    loadCmdSize = *(uint *)(machHeader + 0x14);
+
+    while ((long)lcPtr < machHeader + loadCmdSize) {
+        if (*lcPtr == 0x19) { // LC_SEGMENT_64
+            if (strcmp((char *)(lcPtr + 2), segment_name) == 0) {
+                return lcPtr;
+            }
         }
-        cmd = (struct load_command *)((uint8_t *)cmd + cmd->cmdsize);
+        lcPtr = (int *)((char*)lcPtr + *(uint *)(lcPtr + 1));
     }
+
     return NULL;
 }
 
-// Symbol lookup like MouSSE
-long _SymbolLookup(const char *symbol_name, struct mach_header_64 *kernel_hdr) {
-    if (!kernel_hdr || !symbol_name)
-        return 0;
+long SymbolLookup(const char *symbol_name) {
+    void *printf_ptr = &printf; // just to pass a kernel pointer
+    long kernel_base = 0;
+    _vm_kernel_unslide_or_perm_external(printf_ptr, &kernel_base);
 
-    // Find __LINKEDIT segment
-    struct segment_command_64 *linkedit = FindSegment(kernel_hdr, "__LINKEDIT");
-    if (!linkedit) {
-        _IOLog("MouSSE: __LINKEDIT not found\n");
+    int *mh = (int *)(printf_ptr + (-0x7fffe00000 - kernel_base)); // original base calc
+    if (*mh != -0x1120531) {
         return 0;
     }
 
-    // Find __TEXT segment for base slide
-    struct segment_command_64 *text_seg = FindSegment(kernel_hdr, "__TEXT");
-    if (!text_seg) {
-        _IOLog("MouSSE: __TEXT not found\n");
-        return 0;
-    }
-
-    // LC_SYMTAB command
-    struct load_command *cmd = (struct load_command *)(kernel_hdr + 1);
-    struct symtab_command *symtab = NULL;
-    for (uint32_t i = 0; i < kernel_hdr->ncmds; i++) {
-        if (cmd->cmd == LC_SYMTAB) {
-            symtab = (struct symtab_command *)cmd;
-            break;
+    if (*(int *)0x00003028 > 0x13) { // macOS version check
+        int *prelink = FindSegment64((long)mh, "__PRELINK_TEXT");
+        if (prelink) {
+            mh = *(int **)(prelink + 0x18);
         }
-        cmd = (struct load_command *)((uint8_t *)cmd + cmd->cmdsize);
     }
-    if (!symtab) {
-        _IOLog("MouSSE: LC_SYMTAB not found\n");
+
+    int *linkedit = FindSegment64((long)mh, "__LINKEDIT");
+    if (!linkedit) {
+        IOLog("SymbolLookup: __LINKEDIT not found\n");
         return 0;
     }
 
-    // Compute symbol and string tables
-    uint8_t *linkedit_base = (uint8_t *)linkedit->vmaddr; // virtual address of __LINKEDIT
-    struct nlist_64 *symtab_ptr = (struct nlist_64 *)(linkedit_base + (symtab->symoff - linkedit->fileoff));
-    char *strtab_ptr = (char *)(linkedit_base + (symtab->stroff - linkedit->fileoff));
+    int *lc = mh + 8;
+    long kernel_end = (long)mh + (uint)mh[5];
 
-    // Walk the symbol table
-    for (uint32_t i = 0; i < symtab->nsyms; i++) {
-        const char *name = strtab_ptr + symtab_ptr[i].n_un.n_strx;
-        if (strcmp(name, symbol_name) == 0)
-            return (long)symtab_ptr[i].n_value; // return symbol address
+    for (; (long)lc < kernel_end; lc = (int *)((char*)lc + (uint)lc[1])) {
+        if (*lc == 2 && lc[3] != 0) { // LC_SYMTAB
+            long slide = *(long *)(linkedit + 0x18) - *(long *)(linkedit + 0x28);
+            uint strOffset = lc[4];
+            uint *symtab = (uint *)((ulong)lc[2] + slide);
+            for (uint i = 0; i < (uint)lc[3]; i++) {
+                char *name = (char *)((ulong)symtab[0] + strOffset + slide);
+                if (strcmp(name, symbol_name) == 0) {
+                    return *(long *)(symtab + 2);
+                }
+                symtab += 4;
+            }
+            IOLog("SymbolLookup: Symbol '%s' not found\n", symbol_name);
+            return 0;
+        }
     }
 
-    _IOLog("MouSSE: Symbol '%s' not found\n", symbol_name);
+    IOLog("SymbolLookup: LC_SYMTAB not found\n");
     return 0;
 }

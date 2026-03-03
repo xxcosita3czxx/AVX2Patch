@@ -6,12 +6,20 @@
 
 #define UD_VECTOR 6
 
+#ifdef DEBUG
+#define DBG_LOG(fmt, ...) kprintf(fmt, ##__VA_ARGS__)
+#else
+#define DBG_LOG(fmt, ...) do {} while(0)
+#endif
+
+
 typedef void (*trap_handler_t)(x86_saved_state_t *);
+
 
 static trap_handler_t *idt_table = NULL;
 static trap_handler_t original_ud = NULL;
 
-extern void *SymbolLookup(const char *symbol);
+extern long SymbolLookup(const char *symbol_name);
 
 static void my_ud_handler(x86_saved_state_t *state)
 {
