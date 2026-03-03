@@ -1,6 +1,6 @@
 # AVX2Patch
 
-This project is aiming to enable vector instruction sets from SSE4.2 to (hopefully) AVX2 on older Intel CPUs that dont support them natively. Its purpose is to emulate instructions using already available instructions from Penryn architecture and up. This is done by hooking the #UD (Undefined Instruction) exception handler and emulating the missing instructions when they are encountered. Requires opencore [patch](patch.plist) to work.
+This project is aiming to enable vector instruction sets from SSE4.2 to (hopefully) AVX2 on older Intel CPUs that dont support them natively. Its purpose is to emulate instructions using already available instructions from Penryn architecture and up. This is done by hooking the #UD (Undefined Instruction) exception handler and emulating the missing instructions when they are encountered. ~~Requires opencore [patch](patch.plist) to work.~~
 
 ## Building
 

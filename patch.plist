@@ -18,9 +18,9 @@
                 <key>MaxKernel</key>
                 <string>22.9.9</string>
                 <key>Find</key>
-                <data>dXNlcl90cmFwAA==</data> <!-- base64 of "_user_trap" -->
+                <data>dXNlcl90cmFw</data> <!-- base64 of "_user_trap" -->
                 <key>Replace</key>
-                <data>dXNlcl90cmFwX29yaWcAA==</data> <!-- base64 of "_user_trap_orig" -->
+                <data>dXNlcl90cmFwX29yaWc=</data> <!-- base64 of "_user_trap_orig" -->
                 <key>Count</key>
                 <integer>1</integer> <!-- only replace the definition -->
             </dict>
