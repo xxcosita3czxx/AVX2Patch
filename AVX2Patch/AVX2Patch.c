@@ -6,6 +6,7 @@
 //
 
 #include <mach/mach_types.h>
+#include <i386/trap.h>
 #include <os/log.h>
 #include <libkern/libkern.h>
 #include <stdint.h>
@@ -13,101 +14,8 @@
 
 #define UD_VECTOR 6
 
-// IDT Entry
-typedef struct {
-    uint16_t offset_low;
-    uint16_t selector;
-    uint8_t ist;
-    uint8_t type_attr;
-    uint16_t offset_mid;
-    uint32_t offset_high;
-    uint32_t zero;
-} __attribute__((packed)) idt_entry_t;
-
-typedef struct {
-    uint16_t limit;
-    uint64_t base;
-} __attribute__((packed)) idtr_t;
-
-static idt_entry_t original_ud_entry;
-static int ud_hooked = 0;
-static uint64_t original_ud_handler_addr = 0;
-
-// === Global Variable to Store RIP ===
-static volatile uint64_t saved_rip = 0;
-
-// === Called from ASM handler ===
-void restore_ud_handler(void) {
-    if (!ud_hooked) return;
-
-    idtr_t idtr;
-    __asm__ volatile("sidt %0" : "=m"(idtr));
-    idt_entry_t* idt = (idt_entry_t*)idtr.base;
-    idt[UD_VECTOR] = original_ud_entry;
-
-    ud_hooked = 0;
-    printf("[AVX2Patch] Restored original #UD handler\n");
-}
-
-// === Called from ASM handler ===
-void log_instruction(uint8_t* rip) {
-    printf("[AVX2Patch] Caught #UD at RIP = %p\n", rip);
-    printf("[AVX2Patch] Bytes: %02x %02x %02x %02x %02x\n",
-           rip[0], rip[1], rip[2], rip[3], rip[4]);
-}
-
 void _printlog(const char* msg) {
     os_log(OS_LOG_DEFAULT,"%s", msg);
-}
-
-__attribute__((naked)) void my_ud_handler(void) {
-    __asm__ volatile(
-        // Save RIP to a C variable
-        "movq 0(%rsp), %rax\n\t" // Load RIP from the interrupt frame
-        "movq %rax, saved_rip(%rip)\n\t" // Save RIP to the global variable
-
-        // Log instruction and emulate if possible
-        "movq saved_rip(%rip), %rdi\n\t" // Pass RIP to log_instruction
-        "callq _log_instruction\n\t"
-
-        // Jump to original handler
-        "movq original_ud_handler_addr(%rip), %rax\n\t"
-        "jmp *%rax\n\t"
-
-        "iretq\n\t"
-    );
-}
-
-// === Hook handler ===
-void hook_ud_handler(void) {
-    idtr_t idtr;
-    __asm__ volatile("sidt %0" : "=m"(idtr));
-    idt_entry_t* idt = (idt_entry_t*)idtr.base;
-
-    original_ud_entry = idt[UD_VECTOR];
-
-    // Save the original handler address
-    original_ud_handler_addr =
-        ((uint64_t)original_ud_entry.offset_high << 32) |
-        ((uint64_t)original_ud_entry.offset_mid << 16) |
-        (uint64_t)original_ud_entry.offset_low;
-
-    uint64_t handler_addr = (uint64_t)&my_ud_handler;
-
-    idt_entry_t new_entry = {
-        .offset_low  = handler_addr & 0xFFFF,
-        .selector    = 0x08,
-        .ist         = 0,
-        .type_attr   = 0x8E,
-        .offset_mid  = (handler_addr >> 16) & 0xFFFF,
-        .offset_high = (handler_addr >> 32) & 0xFFFFFFFF,
-        .zero        = 0
-    };
-
-    idt[UD_VECTOR] = new_entry;
-    ud_hooked = 1;
-
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] Hooked #UD handler\n");
 }
 
 static bool has_sse = false;
@@ -170,16 +78,11 @@ static void check_instruction_sets(void)
 kern_return_t AVX2Patch_start(kmod_info_t *ki, void *d)
 {
     check_instruction_sets();
-    hook_ud_handler();
     return KERN_SUCCESS;
 }
 
 kern_return_t AVX2Patch_stop(kmod_info_t *ki, void *d)
 {
     os_log(OS_LOG_DEFAULT,"[AVX2Patch] Stopping AVX2Patch module.\n");
-    // Restore the original #UD handler
-    if (ud_hooked) {
-        restore_ud_handler();
-    }
     return KERN_SUCCESS;
 }
