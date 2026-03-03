@@ -2,17 +2,19 @@
 
 XCODE_ARGS = ARCHS=x86_64 ONLY_ACTIVE_ARCH=YES EXCLUDED_ARCHS=arm64
 name = AVX2Patch-DEBUG.kext
-DEBUG = 1
+OTHER_CFLAGS="-DDEBUG=1"
 
 all:
 	sudo rm -rf dist
-	/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild $(XCODE_ARGS) -project AVX2Patch.xcodeproj -target AVX2Patch CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+	/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild $(XCODE_ARGS) -project AVX2Patch.xcodeproj -target AVX2Patch CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO OTHER_CFLAGS="$(OTHER_CFLAGS)"
 	mkdir -p dist
 	sudo mv -f build/Release/AVX2Patch.kext dist/$(name)
 	sudo chown -R 0:0 dist/$(name)
 
 release:
-	DEBUG=0 name=AVX2Patch-RELEASE.kext all
+	OTHER_CFLAGS="-DDEBUG=0"
+	name=AVX2Patch-RELEASE.kext
+	all
 
 build:
 	make
