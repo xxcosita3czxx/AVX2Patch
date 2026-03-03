@@ -7,7 +7,7 @@ all:
 	sudo rm -rf dist
 	/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild $(XCODE_ARGS) -project AVX2Patch.xcodeproj -target AVX2Patch CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 	mkdir -p dist
-	sudo mv -f build/Debug/AVX2Patch.kext dist/$(name)
+	sudo mv -f build/Release/AVX2Patch.kext dist/$(name)
 	sudo chown -R 0:0 dist/$(name)
 
 release:

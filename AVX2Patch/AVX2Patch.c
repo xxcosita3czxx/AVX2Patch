@@ -14,7 +14,7 @@
 
 #define UD_VECTOR 6
 
-#ifdef DEBUG
+#ifdef !DEBUG
 #define DBG_LOG(fmt, ...) kprintf(fmt, ##__VA_ARGS__)
 #else
 #define DBG_LOG(fmt, ...) do {} while(0)
