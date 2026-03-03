@@ -35,7 +35,8 @@ typedef struct {
 typedef void (*trap_handler_t)(x86_saved_state_t *);
 
 #ifdef DEBUG
-#define DBG_LOG(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#include <IOKit/IOLib.h>
+#define DBG_LOG(fmt, ...) IOLog("[AVX2Patch] " fmt, ##__VA_ARGS__)
 #else
 #define DBG_LOG(fmt, ...) do {} while(0)
 #endif
