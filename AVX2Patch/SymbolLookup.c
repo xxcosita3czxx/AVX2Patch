@@ -53,9 +53,9 @@ long SymbolLookup(const char *symbol_name) {
         if (*lc == 2 && lc[3] != 0) { // LC_SYMTAB
             long slide = *(long *)(linkedit + 0x18) - *(long *)(linkedit + 0x28);
             uint strOffset = lc[4];
-            uint *symtab = (uint *)((ulong)lc[2] + slide);
+            uint *symtab = (uint *)((unsigned long)lc[2] + slide);
             for (uint i = 0; i < (uint)lc[3]; i++) {
-                char *name = (char *)((ulong)symtab[0] + strOffset + slide);
+                char *name = (char *)((unsigned long)symtab[0] + strOffset + slide);
                 if (strcmp(name, symbol_name) == 0) {
                     return *(long *)(symtab + 2);
                 }
