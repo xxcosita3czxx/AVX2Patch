@@ -13,6 +13,7 @@
 #endif
 
 typedef void (*trap_handler_t)(x86_saved_state_t *);
+typedef x86_saved_state64_t x86_saved_state_t;
 
 static trap_handler_t *idt_table = NULL;
 static trap_handler_t original_ud = NULL;
