@@ -1,11 +1,14 @@
 #include <libkern/libkern.h>
 #include <mach/mach_types.h>
 
+typedef unsigned long ulong;
+
 extern void _vm_kernel_unslide_or_perm_external(void *ptr, long *out_base);
+extern ulong loadCmdSize;
 
 int* FindSegment64(long machHeader, const char *segment_name) {
     int *lcPtr;
-    ulong loadCmdSize;
+    unsigned long loadCmdSize;
 
     lcPtr = (int *)(machHeader + 0x20);         
     loadCmdSize = *(uint *)(machHeader + 0x14);
@@ -41,7 +44,7 @@ long SymbolLookup(const char *symbol_name) {
 
     int *linkedit = FindSegment64((long)mh, "__LINKEDIT");
     if (!linkedit) {
-        IOLog("SymbolLookup: __LINKEDIT not found\n");
+        DBG_LOG("SymbolLookup: __LINKEDIT not found\n");
         return 0;
     }
 
@@ -60,11 +63,11 @@ long SymbolLookup(const char *symbol_name) {
                 }
                 symtab += 4;
             }
-            IOLog("SymbolLookup: Symbol '%s' not found\n", symbol_name);
+            DBG_LOG("SymbolLookup: Symbol '%s' not found\n", symbol_name);
             return 0;
         }
     }
 
-    IOLog("SymbolLookup: LC_SYMTAB not found\n");
+    DBG_LOG("SymbolLookup: LC_SYMTAB not found\n");
     return 0;
 }
