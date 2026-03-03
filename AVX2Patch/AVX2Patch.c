@@ -12,9 +12,7 @@
 #define DBG_LOG(fmt, ...) do {} while(0)
 #endif
 
-
 typedef void (*trap_handler_t)(x86_saved_state_t *);
-
 
 static trap_handler_t *idt_table = NULL;
 static trap_handler_t original_ud = NULL;
@@ -46,25 +44,25 @@ kern_return_t AVX2Patch_start(kmod_info_t *ki, void *d)
 
     idt_table = (trap_handler_t *)SymbolLookup("_idt64_hndl_table0");
     if (!idt_table) {
-        os_log(OS_LOG_DEFAULT, "[AVX2Patch] Failed to resolve _idt64_hndl_table0\n");
+        DBG_LOG("[AVX2Patch] Failed to resolve _idt64_hndl_table0\n");
         return KERN_FAILURE;
     }
 
-    original_ud = idt_table[UD_VECTOR];
+//    original_ud = idt_table[UD_VECTOR];
+//
+//    idt_table[UD_VECTOR] = my_ud_handler;
 
-    idt_table[UD_VECTOR] = my_ud_handler;
-
-    os_log(OS_LOG_DEFAULT, "[AVX2Patch] #UD vector hooked\n");
+    DBG_LOG("[AVX2Patch] #UD vector hooked\n");
 
     return KERN_SUCCESS;
 }
 
 kern_return_t AVX2Patch_stop(kmod_info_t *ki, void *d)
 {
-    if (idt_table && original_ud) {
-        idt_table[UD_VECTOR] = original_ud;
-        os_log(OS_LOG_DEFAULT, "[AVX2Patch] #UD vector restored\n");
-    }
+//    if (idt_table && original_ud) {
+//        idt_table[UD_VECTOR] = original_ud;
+    DBG_LOG("[AVX2Patch] #UD vector restored\n");
+//    }
 
     return KERN_SUCCESS;
 }
