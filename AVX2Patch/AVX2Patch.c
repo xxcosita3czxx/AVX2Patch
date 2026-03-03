@@ -20,7 +20,7 @@
 #define DBG_LOG(fmt, ...) do {} while(0)
 #endif
 
-
+// declares
 static bool has_sse = false;
 static bool has_sse2 = false;
 static bool has_sse3 = false;
@@ -30,6 +30,9 @@ static bool has_sse42 = false;
 static bool has_avx = false;
 static bool has_fma = false;
 static bool has_avx2 = false;
+
+// so kernel wont panic with no user trap
+extern void _user_trap_orig(x86_saved_state_t *saved_state);
 
 static void check_instruction_sets(void)
 {
@@ -76,6 +79,15 @@ static void check_instruction_sets(void)
     DBG_LOG("[AVX2Patch] AVX: %s\n", has_avx ? "Supported" : "Not Supported");
     DBG_LOG("[AVX2Patch] FMA: %s\n", has_fma ? "Supported" : "Not Supported");
     DBG_LOG("[AVX2Patch] AVX2: %s\n", has_avx2 ? "Supported" : "Not Supported");
+}
+
+
+//the kernel definition:
+void user_trap( x86_saved_state_t *saved_state) {
+    DBG_LOG("[AVX2Patch] Caught #UD exception in user_trap handler\n");
+    // Call the original handler to avoid kernel panic
+    _user_trap_orig(saved_state);
+
 }
 
 kern_return_t AVX2Patch_start(kmod_info_t *ki, void *d)

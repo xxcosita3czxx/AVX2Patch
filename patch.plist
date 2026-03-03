@@ -5,9 +5,26 @@
     <key>Kernel</key>
     <dict>
         <key>Patch</key>
-        <dict>
-            
-        </dict>
+        <array>
+            <dict>
+                <key>Comment</key>
+                <string>Rename _user_trap to _user_trap_orig</string>
+                <key>Enabled</key>
+                <true/>
+                <key>Arch</key>
+                <string>x86_64</string>
+                <key>MinKernel</key>
+                <string>20.0.0</string>
+                <key>MaxKernel</key>
+                <string>22.9.9</string>
+                <key>Find</key>
+                <data>dXNlcl90cmFwAA==</data> <!-- base64 of "_user_trap" -->
+                <key>Replace</key>
+                <data>dXNlcl90cmFwX29yaWcAA==</data> <!-- base64 of "_user_trap_orig" -->
+                <key>Count</key>
+                <integer>1</integer> <!-- only replace the definition -->
+            </dict>
+        </array>
     </dict>
 </dict>
 </plist>
