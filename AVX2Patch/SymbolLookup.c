@@ -5,6 +5,7 @@ typedef unsigned long ulong;
 
 extern void _vm_kernel_unslide_or_perm_external(void *ptr, long *out_base);
 extern ulong loadCmdSize;
+extern void DBG_LOG(const char *fmt, ...);
 
 int* FindSegment64(long machHeader, const char *segment_name) {
     int *lcPtr;
