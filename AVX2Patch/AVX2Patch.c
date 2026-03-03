@@ -1,7 +1,7 @@
-#include <mach/mach_types.h>
-#include <i386/trap.h>
-#include <os/log.h>
 #include <libkern/libkern.h>
+#include <i386/trap.h>
+#include <mach/mach_types.h>
+#include <os/log.h>
 #include <stdint.h>
 
 #define UD_VECTOR 6
@@ -35,7 +35,7 @@ typedef struct {
 typedef void (*trap_handler_t)(x86_saved_state_t *);
 
 #ifdef DEBUG
-#define DBG_LOG(fmt, ...) kprintf(fmt, ##__VA_ARGS__)
+#define DBG_LOG(fmt, ...) printf(fmt, ##__VA_ARGS__)
 #else
 #define DBG_LOG(fmt, ...) do {} while(0)
 #endif
