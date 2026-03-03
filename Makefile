@@ -9,6 +9,9 @@ all:
 	sudo mv -f build/Release/AVX2Patch.kext dist/AVX2Patch.kext
 	sudo chown -R 0:0 dist/AVX2Patch.kext
 
+release:
+	DEBUG=0 all
+
 build:
 	make
 rebuild:
@@ -19,13 +22,15 @@ clean:
 	sudo rm -rf dist
 	sudo rm -rf build
 
-load:
-	sudo kextload dist/AVX2Patch.kext
-unload:
-	sudo kextunload dist/AVX2Patch.kext
-reload:
-	sudo kextunload dist/AVX2Patch.kext
-	sudo kextload dist/AVX2Patch.kext
+
+## WARNING: UNSAFE TO USE
+#load:
+#	sudo kextload dist/AVX2Patch.kext
+#unload:
+#	sudo kextunload dist/AVX2Patch.kext
+#reload:
+#	sudo kextunload dist/AVX2Patch.kext
+#	sudo kextload dist/AVX2Patch.kext
 
 test:
 	./test.sh

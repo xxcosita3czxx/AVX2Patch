@@ -12,16 +12,26 @@ make all
 
 This will compile the source code and create the `AVX2Patch.kext` file in the `build/Release` directory.
 
-## Docs
+## Sources
 
 This related things to the project:
 
 * [XNU Kernel trap.c](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/i386/trap.c)
-* [OpenCore Kernel Patching](https://deepwiki.com/acidanthera/OpenCorePkg/4.2-kernel-patching)
+* [OpenCore Kernel Patching](https://deepwiki.com/acidanthera/OpenCorePkg/4.2-kernel-patching) -> [patch.plist](patch.plist)
+* [XNU Kernel user_trap / kernel_trap switch](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/x86_64/idt64.s#L1522) ->
+
+this is how the assembly looks in logic
+
+```python
+if CSP == 3:
+    kernel_trap()
+else:
+    user_trap()
+```
 
 ## Thanks
 
-- [@dortania](https://github.com/dortania) for his amazing work on OpenCore wikipedia.
-- [@acidanthera](https://github.com/acidanthera) for their contributions to OpenCore and related projects.
-- [@apple-oss-distributions](https://github.com/apple-oss-distributions) for their open sourced XNU kernel.
-- Everyone who contributed to the development of this project and provided feedback and support.
+* [@dortania](https://github.com/dortania) for his amazing work on OpenCore wikipedia.
+* [@acidanthera](https://github.com/acidanthera) for their contributions to OpenCore and related projects.
+* [@apple-oss-distributions](https://github.com/apple-oss-distributions) for their open sourced XNU kernel.
+* Everyone who contributed to the development of this project and provided feedback and support.

@@ -14,9 +14,12 @@
 
 #define UD_VECTOR 6
 
-void _printlog(const char* msg) {
-    os_log(OS_LOG_DEFAULT,"%s", msg);
-}
+#ifdef DEBUG
+#define DBG_LOG(fmt, ...) kprintf(fmt, ##__VA_ARGS__)
+#else
+#define DBG_LOG(fmt, ...) do {} while(0)
+#endif
+
 
 static bool has_sse = false;
 static bool has_sse2 = false;
@@ -50,7 +53,7 @@ static void check_instruction_sets(void)
     has_avx   = (ecx & (1 << 28)) != 0;
     has_fma   = (ecx & (1 << 12)) != 0;
 
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] After CPUID leaf 1\n");
+    DBG_LOG("[AVX2Patch] After CPUID leaf 1\n");
 
     // CPUID leaf 7, subleaf 0: extended features (AVX2)
     eax = 7; ecx = 0;
@@ -62,22 +65,23 @@ static void check_instruction_sets(void)
     );
     has_avx2 = (ebx & (1 << 5)) != 0;
 
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] After CPUID leaf 7\n");
+    DBG_LOG("[AVX2Patch] After CPUID leaf 7\n");
 
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] SSE: %s\n", has_sse ? "Supported" : "Not Supported");
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] SSE2: %s\n", has_sse2 ? "Supported" : "Not Supported");
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] SSE3: %s\n", has_sse3 ? "Supported" : "Not Supported");
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] SSSE3: %s\n", has_ssse3 ? "Supported" : "Not Supported");
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] SSE4.1: %s\n", has_sse41 ? "Supported" : "Not Supported");
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] SSE4.2: %s\n", has_sse42 ? "Supported" : "Not Supported");
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] AVX: %s\n", has_avx ? "Supported" : "Not Supported");
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] FMA: %s\n", has_fma ? "Supported" : "Not Supported");
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] AVX2: %s\n", has_avx2 ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] SSE: %s\n", has_sse ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] SSE2: %s\n", has_sse2 ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] SSE3: %s\n", has_sse3 ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] SSSE3: %s\n", has_ssse3 ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] SSE4.1: %s\n", has_sse41 ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] SSE4.2: %s\n", has_sse42 ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] AVX: %s\n", has_avx ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] FMA: %s\n", has_fma ? "Supported" : "Not Supported");
+    DBG_LOG("[AVX2Patch] AVX2: %s\n", has_avx2 ? "Supported" : "Not Supported");
 }
 
 kern_return_t AVX2Patch_start(kmod_info_t *ki, void *d)
 {
     check_instruction_sets();
+    os_log(OS_LOG_DEFAULT,"[AVX2Patch] Starting AVX2Patch module.\n");
     return KERN_SUCCESS;
 }
 
