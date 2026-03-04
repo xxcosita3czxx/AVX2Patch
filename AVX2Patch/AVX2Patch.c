@@ -36,7 +36,7 @@ typedef void (*trap_handler_t)(x86_saved_state_t *);
 
 #ifdef DEBUG
 #include <IOKit/IOLib.h>
-#define DBG_LOG(fmt, ...) IOLog("[AVX2Patch] " fmt, ##__VA_ARGS__)
+#define DBG_LOG(fmt, ...) IOLog(fmt, ##__VA_ARGS__)
 #else
 #define DBG_LOG(fmt, ...) do {} while(0)
 #endif
@@ -59,7 +59,7 @@ extern long SymbolLookup(const char *symbol_name);
 
 static void check_instruction_sets(void)
 {
-    os_log(OS_LOG_DEFAULT,"[AVX2Patch] Entering check_instruction_sets()\n");
+    DBG_LOG("[AVX2Patch] Entering check_instruction_sets()\n");
     unsigned int eax, ebx, ecx, edx;
 
     // CPUID leaf 1: basic features
