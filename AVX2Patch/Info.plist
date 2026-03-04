@@ -2,6 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleIdentifier</key>
+	<string>com.cosita3cz.AVX2Patch</string>
+
+	<key>CFBundleVersion</key>
+	<string>1.0.0</string>
+
+	<key>OSBundleRequired</key>
+	<string>Root</string>
+
 	<key>OSBundleLibraries</key>
 	<dict>
 		<key>com.apple.kpi.libkern</key>
