@@ -40,6 +40,9 @@ clean:
 test:
 	./test.sh
 
+mount_efi:
+	sudo diskutil mount disk0s1
+
 please_stop_kext_consent:
 	sudo nvram 6C6F6769-6E67-0000-0000-000000000000:Disable=%01
 	echo "Please restart the machine to take effect"
