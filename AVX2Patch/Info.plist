@@ -15,6 +15,10 @@
 	<dict>
 		<key>com.apple.kpi.libkern</key>
 		<string>22.0.0</string>
+		<key>com.apple.kpi.mach</key>
+		<string>22.0.0</string>
+		<key>com.apple.kpi.iokit</key>
+		<string>22.0.0</string>
 	</dict>
 </dict>
 </plist>
