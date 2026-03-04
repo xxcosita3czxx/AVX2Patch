@@ -43,6 +43,10 @@ test:
 mount_efi:
 	sudo diskutil mount disk0s1
 
+edit_efi:
+	mount_efi
+	sudo micro /Volumes/EFI/EFI/OC/config.plist
+
 please_stop_kext_consent:
 	sudo nvram 6C6F6769-6E67-0000-0000-000000000000:Disable=%01
 	echo "Please restart the machine to take effect"
