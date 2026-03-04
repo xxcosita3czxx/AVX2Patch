@@ -44,11 +44,11 @@ mount_efi:
 	sudo diskutil mount disk0s1
 
 edit_efi:
-	mount_efi
+	make mount_efi
 	sudo micro /Volumes/EFI/EFI/OC/config.plist
 
 check_efi:
-	mount_efi
+	make mount_efi
 	sudo micro /Volumes/EFI/opencore-*.log | tail -1
 
 please_stop_kext_consent:
