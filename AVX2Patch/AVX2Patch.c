@@ -36,9 +36,9 @@ typedef void (*trap_handler_t)(x86_saved_state_t *);
 
 #ifdef DEBUG
 #include <IOKit/IOLib.h>
-#define DBG_LOG(fmt, ...) IOLog(fmt, ##__VA_ARGS__)
+#define DBG_LOG(fmt...) IOLog(fmt)
 #else
-#define DBG_LOG(fmt, ...) do {} while(0)
+#define DBG_LOG(fmt...) do {} while(0)
 #endif
 
 static bool has_sse = false;
